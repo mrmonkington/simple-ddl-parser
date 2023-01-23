@@ -764,9 +764,10 @@ class BaseSQL(
 
     def p_create_index(self, p: List) -> None:
         """create_index : CREATE INDEX id
+        | CREATE KEY id
         | CREATE UNIQUE INDEX id
+        | CREATE UNIQUE KEY id
         | create_index ON id
-        | CREATE CLUSTERED INDEX id
         """
         p_list = list(p)
         if "CLUSTERED" in p_list:

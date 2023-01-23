@@ -2,6 +2,73 @@ from unittest import result
 
 from simple_ddl_parser import DDLParser
 
+def test_key_index_synonyms():
+    index_ddl = """
+        CREATE TABLE t1 (
+            val INT,
+        );
+        CREATE INDEX idx1 ON t1(val);
+    """
+    key_ddl = """
+        CREATE TABLE t1 (
+            val INT,
+        );
+        CREATE KEY idx1 ON t1(val);
+    """
+    key_form = DDLParser(key_ddl).run()
+    index_form = DDLParser(index_ddl).run()
+    assert index_form == key_form
+
+def test_inline_index():
+    ddl = """
+        CREATE TABLE t1 (
+            val INT,
+            INDEX idx1(val)
+        );
+    """
+    result = DDLParser(ddl).run()
+
+    expected = [
+        {
+            'alter': {},
+            'checks': [],
+            'columns': [
+                {
+                    'check': None,
+                    'default': None,
+                    'name': 'val',
+                    'nullable': True,
+                    'references': None,
+                    'size': None,
+                    'type': 'INT',
+                    'unique': False
+                }
+            ],
+            'index': [
+                {
+                    'columns': [
+                        'val'
+                    ],
+                    'detailed_columns':
+                    [
+                        {
+                            'name': 'val',
+                            'nulls': 'LAST',
+                            'order': 'ASC'
+                        }
+                    ],
+                    'index_name': 'idx1',
+                    'unique': False
+                }
+            ],
+            'partitioned_by': [],
+            'primary_key': [],
+            'schema': None,
+            'table_name': 't1',
+            'tablespace': None
+        }
+    ]
+    assert expected == result
 
 def test_simple_on_update():
     ddl = """CREATE TABLE t1 (
