@@ -2,6 +2,8 @@ from unittest import result
 
 from simple_ddl_parser import DDLParser
 
+import sys
+
 def test_key_index_synonyms():
     index_ddl = """
         CREATE TABLE t1 (
@@ -53,6 +55,74 @@ def test_inline_index():
                     [
                         {
                             'name': 'val',
+                            'nulls': 'LAST',
+                            'order': 'ASC'
+                        }
+                    ],
+                    'index_name': 'idx1',
+                    'unique': False
+                }
+            ],
+            'partitioned_by': [],
+            'primary_key': [],
+            'schema': None,
+            'table_name': 't1',
+            'tablespace': None
+        }
+    ]
+    assert expected == result
+
+def test_inline_multicol_index():
+    ddl = """
+        CREATE TABLE t1 (
+            val INT,
+            val2 INT,
+            INDEX idx1(val, val2)
+        );
+    """
+    result = DDLParser(ddl).run()
+
+    expected = [
+        {
+            'alter': {},
+            'checks': [],
+            'columns': [
+                {
+                    'check': None,
+                    'default': None,
+                    'name': 'val',
+                    'nullable': True,
+                    'references': None,
+                    'size': None,
+                    'type': 'INT',
+                    'unique': False
+                },
+                {
+                    'check': None,
+                    'default': None,
+                    'name': 'val2',
+                    'nullable': True,
+                    'references': None,
+                    'size': None,
+                    'type': 'INT',
+                    'unique': False
+                }
+            ],
+            'index': [
+                {
+                    'columns': [
+                        'val',
+                        'val2'
+                    ],
+                    'detailed_columns':
+                    [
+                        {
+                            'name': 'val',
+                            'nulls': 'LAST',
+                            'order': 'ASC'
+                        },
+                        {
+                            'name': 'val2',
                             'nulls': 'LAST',
                             'order': 'ASC'
                         }
