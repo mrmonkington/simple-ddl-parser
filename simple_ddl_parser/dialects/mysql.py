@@ -1,5 +1,4 @@
 import simple_ddl_parser  # noqa: F401 weird issue with failed tests
-from typing import List
 
 
 class MySQL:
@@ -13,4 +12,3 @@ class MySQL:
             p[0] = {"on_update": p_list[-1]}
         else:
             p[0] = {"on_update": p_list[-2]}
-

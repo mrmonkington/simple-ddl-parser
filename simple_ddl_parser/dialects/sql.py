@@ -815,7 +815,6 @@ class BaseSQL(
                 "clustered": clustered,
             }
 
-
     def extract_check_data(self, p, p_list):
         if isinstance(p_list[-1]["check"], list):
             check = " ".join(p_list[-1]["check"])
