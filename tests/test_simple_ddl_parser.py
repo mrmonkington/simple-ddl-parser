@@ -1609,10 +1609,10 @@ def test_column_names_with_names_like_tokens_works_well():
     CREATE TABLE foo
     (
         entity_id        UUID PRIMARY KEY DEFAULT getId(),
-        key              VARCHAR(256)
+        `key`              VARCHAR(256)
     );
     """
-    result = DDLParser(ddl).run(group_by_type=True)
+    result = DDLParser(ddl, normalize_names=True).run(group_by_type=True)
     expected = {
         "tables": [
             {

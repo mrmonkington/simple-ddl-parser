@@ -5,10 +5,10 @@ from simple_ddl_parser import DDLParser, parse_from_file
 
 def test_json_dump_arg():
     ddl = """
-    CREATE TABLE list_bucket_single (key STRING, value STRING)
-    SKEWED BY (key) ON (1,5,6) STORED AS DIRECTORIES;
+    CREATE TABLE list_bucket_single (`key` STRING, `value` STRING)
+    SKEWED BY (`key`) ON (1,5,6) STORED AS DIRECTORIES;
     """
-    parse_results = DDLParser(ddl).run(output_mode="hql", json_dump=True)
+    parse_results = DDLParser(ddl, normalize_names=True).run(output_mode="hql", json_dump=True)
     expected = (
         '[{"columns": [{"name": "key", "type": "STRING", "size": null, "references": null, '
         '"unique": false, "nullable": true, "default": null, "check": null}, {"name": "value", '

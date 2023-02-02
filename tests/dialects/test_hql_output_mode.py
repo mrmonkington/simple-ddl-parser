@@ -1844,15 +1844,15 @@ def test_output_input_format():
 
 def test_skewed_by():
     ddl = """
-    CREATE TABLE list_bucket_single (key STRING, value STRING)
-      SKEWED BY (key) ON (1,5,6) STORED AS DIRECTORIES;
+    CREATE TABLE list_bucket_single (k STRING, v STRING)
+      SKEWED BY (k) ON (1,5,6) STORED AS DIRECTORIES;
     """
     parse_results = DDLParser(ddl).run(output_mode="hql")
     expected = [
         {
             "columns": [
                 {
-                    "name": "key",
+                    "name": "k",
                     "type": "STRING",
                     "size": None,
                     "references": None,
@@ -1862,7 +1862,7 @@ def test_skewed_by():
                     "check": None,
                 },
                 {
-                    "name": "value",
+                    "name": "v",
                     "type": "STRING",
                     "size": None,
                     "references": None,
@@ -1889,7 +1889,7 @@ def test_skewed_by():
             "external": False,
             "schema": None,
             "table_name": "list_bucket_single",
-            "skewed_by": {"key": "key", "on": ["1", "5", "6"]},
+            "skewed_by": {"key": "k", "on": ["1", "5", "6"]},
         }
     ]
     assert expected == parse_results

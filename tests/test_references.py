@@ -450,7 +450,20 @@ def test_foreigen_keys():
                             'size': 255,
                             'type': 'varchar',
                             'unique': False}],
-                'index': [],
+                            'index': [
+                                {
+                                    'columns': ['timeperiod_id'],
+                                    'detailed_columns': [
+                                        {
+                                            'name': 'timeperiod_id',
+                                            'nulls': 'LAST',
+                                            'order': 'ASC'
+                                        }
+                                    ],
+                                    'index_name': None,
+                                    'unique': False
+                                }
+                            ],
                 'partitioned_by': [],
                 'primary_key': ['exception_id'],
                 'schema': None,
