@@ -57,6 +57,8 @@ first_liners = {
     "UNIQUE": "UNIQUE",
     "CHECK": "CHECK",
     "WITH": "WITH",
+    "INDEX": "INDEX",
+    "KEY": "KEY"
 }
 
 common_statements.update(first_liners)
