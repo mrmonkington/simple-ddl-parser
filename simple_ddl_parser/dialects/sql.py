@@ -7,9 +7,6 @@ from simple_ddl_parser.utils import check_spec, remove_par
 
 auth = "AUTHORIZATION"
 
-import logging
-log = logging.getLogger()
-
 
 class AfterColumns:
     def p_expression_partition_by(self, p: List) -> None:
@@ -202,7 +199,6 @@ class Column:
         | c_type ARRAY
         | c_type tid
         """
-        log.debug("c_type")
         p[0] = {}
         p_list = remove_par(list(p))
         _type = None
@@ -297,11 +293,8 @@ class Column:
         | column LP id COMMA id RP
         | column LP id COMMA id RP c_type
         """
-        log.debug("column")
         p[0] = self.set_base_column_propery(p)
         p_list = list(p)
-
-        log.debug(p_list)
         p_list = self.process_oracle_type_size(p_list)
 
         p_list = remove_par(p_list)
@@ -362,8 +355,8 @@ class Column:
         p[0] = {"autoincrement": True}
 
     def p_defcolumn(self, p: List) -> None:
-        """defcolumn : inline_create_index
-        | column
+        """defcolumn : column
+        | inline_index
         | defcolumn comment
         | defcolumn null
         | defcolumn encode
@@ -383,15 +376,9 @@ class Column:
         | defcolumn options
         | defcolumn autoincrement
         """
-        log.debug("defcolumn")
-        log.debug(p[1])
         if isinstance(p[1], dict) and "index_name" in p[1]:
-            log.debug("inline_create_index returned an index")
-            # this is an inline index
             p[0] = p[1]
-            p_list = list(p)
         else:
-            log.debug("inline_create_index did not return an index")
             p[0] = p[1]
             p_list = list(p)
 
@@ -764,6 +751,24 @@ class BaseSQL(
             else:
                 p[0][item].extend(p_list[-1][item])
 
+    def p_inline_index(self, p: List) -> None:
+        """inline_index : INDEX id LP index_pid RP
+        | KEY LP index_pid RP
+        """
+        p_list = remove_par(list(p))
+        # set columns
+        p[0] = {
+            # "schema": None,
+            "index_name": p_list[2],
+            "unique": "UNIQUE" in p_list,
+            # "clustered": clustered,
+        }
+        for item in ["detailed_columns", "columns"]:
+            if item not in p[0]:
+                p[0][item] = p_list[3][item]
+            else:
+                p[0][item].extend(p_list[-1][item])
+
     def p_index_table_name(self, p: List) -> None:
         """index_table_name : create_index ON id
         | create_index ON id DOT id
@@ -784,6 +789,8 @@ class BaseSQL(
         | CREATE UNIQUE INDEX id
         | CREATE UNIQUE KEY id
         | create_index ON id
+        | CREATE CLUSTERED INDEX id
+        | CREATE CLUSTERED KEY id
         """
         p_list = list(p)
         if "CLUSTERED" in p_list:
@@ -800,33 +807,6 @@ class BaseSQL(
                 "clustered": clustered,
             }
 
-    def p_inline_create_index(self, p: List) -> None:
-        """inline_create_index : INDEX id LP pid RP
-        | KEY id LP pid RP
-        | UNIQUE INDEX id LP pid RP
-        | UNIQUE KEY id LP pid RP
-        | INDEX LP pid RP
-        | KEY LP pid RP
-        | UNIQUE INDEX LP pid RP
-        | UNIQUE KEY LP pid RP
-        """
-        log.debug("inline_create_index called")
-        p_list = remove_par(list(p))
-        clustered = False
-        # set columns
-        p[0] = p_list[-1]
-        p[0].update( {
-            "schema": None,
-            #"index_name": p_list[-1],
-            "unique": "UNIQUE" in p_list,
-            "clustered": clustered,
-        } )
-        p[0] = p[1]
-        for item in ["detailed_columns", "columns"]:
-            if item not in p[0]:
-                p[0][item] = p_list[-1][item]
-            else:
-                p[0][item].extend(p_list[-1][item])
 
     def extract_check_data(self, p, p_list):
         if isinstance(p_list[-1]["check"], list):
@@ -872,6 +852,8 @@ class BaseSQL(
                     p[0]["columns"] = []
                 p[0]["columns"].append(p_list[-1])
             elif "index_name" in p_list[-1]:
+                if "index" not in p[0]:
+                    p[0]["index"] = []
                 p[0]["index"].append(p_list[-1])
             elif "check" in p_list[-1]:
                 p[0] = self.extract_check_data(p, p_list)
