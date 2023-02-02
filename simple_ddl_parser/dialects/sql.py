@@ -753,19 +753,27 @@ class BaseSQL(
 
     def p_inline_index(self, p: List) -> None:
         """inline_index : INDEX id LP index_pid RP
+        | KEY id LP index_pid RP
+        | INDEX LP index_pid RP
         | KEY LP index_pid RP
+        | UNIQUE INDEX id LP index_pid RP
+        | UNIQUE KEY id LP index_pid RP
+        | UNIQUE INDEX LP index_pid RP
+        | UNIQUE KEY LP index_pid RP
         """
         p_list = remove_par(list(p))
-        # set columns
         p[0] = {
-            # "schema": None,
-            "index_name": p_list[2],
-            "unique": "UNIQUE" in p_list,
-            # "clustered": clustered,
+            "unique": False,
+            "index_name": None
         }
+        if p_list[1] == "UNIQUE":
+            p[0]["unique"] = True
+            p_list.pop(1)
+        if len(p_list) == 4:
+            p[0]["index_name"] = p_list[2]
         for item in ["detailed_columns", "columns"]:
             if item not in p[0]:
-                p[0][item] = p_list[3][item]
+                p[0][item] = p_list[-1][item]
             else:
                 p[0][item].extend(p_list[-1][item])
 
