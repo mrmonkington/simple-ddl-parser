@@ -4,6 +4,7 @@ from simple_ddl_parser import DDLParser
 
 import sys
 
+
 def test_key_index_synonyms():
     index_ddl = """
         CREATE TABLE t1 (
@@ -21,6 +22,7 @@ def test_key_index_synonyms():
     index_form = DDLParser(index_ddl).run()
     assert index_form == key_form
 
+
 def test_inline_index():
     ddl = """
         CREATE TABLE t1 (
@@ -28,7 +30,7 @@ def test_inline_index():
             INDEX idx1(val)
         );
     """
-    result = DDLParser(ddl).run()
+    result = DDLParser(ddl, debug=True).run()
 
     expected = [
         {
@@ -77,7 +79,8 @@ def test_inline_multicol_index():
         CREATE TABLE t1 (
             val INT,
             val2 INT,
-            INDEX idx1(val, val2)
+            val3 INT,
+            INDEX idx1(val, val2, val3)
         );
     """
     result = DDLParser(ddl).run()
@@ -106,13 +109,24 @@ def test_inline_multicol_index():
                     'size': None,
                     'type': 'INT',
                     'unique': False
+                },
+                {
+                    'check': None,
+                    'default': None,
+                    'name': 'val3',
+                    'nullable': True,
+                    'references': None,
+                    'size': None,
+                    'type': 'INT',
+                    'unique': False
                 }
             ],
             'index': [
                 {
                     'columns': [
                         'val',
-                        'val2'
+                        'val2',
+                        'val3'
                     ],
                     'detailed_columns':
                     [
@@ -123,6 +137,11 @@ def test_inline_multicol_index():
                         },
                         {
                             'name': 'val2',
+                            'nulls': 'LAST',
+                            'order': 'ASC'
+                        },
+                        {
+                            'name': 'val3',
                             'nulls': 'LAST',
                             'order': 'ASC'
                         }
